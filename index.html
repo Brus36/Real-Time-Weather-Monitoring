@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time weather monitoring — search any city worldwide for live temperature, humidity, wind, and atmospheric conditions.">
+    <title>Real-Time Weather Monitoring</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Animated Background Orbs -->
+    <div class="bg-animation" aria-hidden="true">
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+        <div class="bg-orb"></div>
+    </div>
+
+    <!-- Massive Background Weather Animation -->
+    <div class="weather-anim bg-weather-anim" id="bgWeatherAnim" aria-hidden="true">
+        <div class="anim-layer anim-l1"></div>
+        <div class="anim-layer anim-l2"></div>
+        <div class="anim-layer anim-l3"></div>
+        <div class="anim-layer anim-l4"></div>
+        <div class="anim-layer anim-l5"></div>
+        <div class="anim-layer anim-l6"></div>
+    </div>
+
+    <!-- Error Toast -->
+    <div class="error-toast" id="errorToast" role="alert">
+        <span class="material-symbols-rounded">error</span>
+        <span id="errorMessage">City not found</span>
+    </div>
+
+    <main class="app-container">
+
+        <!-- Header -->
+        <header class="app-header">
+            <h1>Weather Monitor</h1>
+            <p class="subtitle">Real-time global conditions</p>
+        </header>
+
+        <!-- Search -->
+        <section class="search-container" aria-label="City search">
+            <form class="search-form" id="weatherForm" autocomplete="off">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="cityInput"
+                    placeholder="Search any city..."
+                    aria-label="Enter city name"
+                    required
+                >
+                <button type="submit" class="search-btn" aria-label="Search weather">
+                    <span class="material-symbols-rounded">search</span>
+                </button>
+            </form>
+            <!-- Autocomplete Suggestions -->
+            <ul class="suggestions-list" id="suggestionsList" role="listbox" aria-label="City suggestions"></ul>
+        </section>
+
+        <!-- Empty State (shown initially) -->
+        <div class="empty-state" id="emptyState">
+            <span class="material-symbols-rounded">cloud_queue</span>
+            <p>Search a city to see live weather</p>
+        </div>
+
+        <!-- Loading Skeleton -->
+        <div class="skeleton-wrapper" id="skeleton">
+            <div class="skeleton-card">
+                <div class="skeleton-line skeleton-icon"></div>
+                <div class="skeleton-line skeleton-title"></div>
+                <div class="skeleton-line skeleton-subtitle"></div>
+                <div class="skeleton-line skeleton-temp"></div>
+                <div class="skeleton-line skeleton-badge"></div>
+                <div class="skeleton-grid">
+                    <div class="skeleton-line skeleton-detail"></div>
+                    <div class="skeleton-line skeleton-detail"></div>
+                    <div class="skeleton-line skeleton-detail"></div>
+                    <div class="skeleton-line skeleton-detail"></div>
+                    <div class="skeleton-line skeleton-detail"></div>
+                    <div class="skeleton-line skeleton-detail"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Card (hidden until data loads) -->
+        <section class="weather-card" id="weatherCard" aria-label="Weather results">
+
+            <!-- Hero -->
+            <div class="weather-hero">
+                <div class="weather-icon-wrapper">
+                    <div class="weather-anim" id="weatherAnim">
+                        <div class="anim-layer anim-l1"></div>
+                        <div class="anim-layer anim-l2"></div>
+                        <div class="anim-layer anim-l3"></div>
+                        <div class="anim-layer anim-l4"></div>
+                        <div class="anim-layer anim-l5"></div>
+                        <div class="anim-layer anim-l6"></div>
+                    </div>
+                </div>
+                <div class="city-name" id="cityName">—</div>
+                <div class="city-time" id="cityTime"></div>
+                <div class="temperature" id="temperature">—</div>
+                <div class="weather-badge" id="weatherBadge">—</div>
+            </div>
+
+            <!-- Detail Cards -->
+            <div class="details-grid">
+                <div class="detail-card" id="cardFeels">
+                    <span class="detail-icon">🌡️</span>
+                    <div class="detail-label">Feels Like</div>
+                    <div class="detail-value" id="feelsLike">—</div>
+                </div>
+                <div class="detail-card" id="cardHumidity">
+                    <span class="detail-icon">💧</span>
+                    <div class="detail-label">Humidity</div>
+                    <div class="detail-value" id="humidity">—</div>
+                </div>
+                <div class="detail-card" id="cardWind">
+                    <span class="detail-icon">💨</span>
+                    <div class="detail-label">Wind</div>
+                    <div class="detail-value" id="wind">—</div>
+                </div>
+                <div class="detail-card" id="cardVisibility">
+                    <span class="detail-icon">👁️</span>
+                    <div class="detail-label">Visibility</div>
+                    <div class="detail-value" id="visibility">—</div>
+                </div>
+                <div class="detail-card" id="cardPressure">
+                    <span class="detail-icon">🔻</span>
+                    <div class="detail-label">Pressure</div>
+                    <div class="detail-value" id="pressure">—</div>
+                </div>
+                <div class="detail-card" id="cardSunrise">
+                    <span class="detail-icon">🌅</span>
+                    <div class="detail-label">Sunrise</div>
+                    <div class="detail-value" id="sunrise">—</div>
+                </div>
+            </div>
+
+            <!-- Forecast Section -->
+            <div class="section-divider"></div>
+            <section class="forecast-section" id="forecastSection" aria-label="5-day forecast">
+                <h2 class="section-title">
+                    <span class="material-symbols-rounded">calendar_month</span>
+                    5-Day Forecast
+                </h2>
+                <div class="forecast-scroll" id="forecastScroll">
+                    <!-- Forecast cards rendered by JS -->
+                </div>
+            </section>
+
+            <!-- Air Quality Section -->
+            <div class="section-divider"></div>
+            <section class="aqi-section" id="aqiSection" aria-label="Air quality">
+                <h2 class="section-title">
+                    <span class="material-symbols-rounded">eco</span>
+                    Air Quality
+                </h2>
+                <div class="aqi-header">
+                    <div class="aqi-badge" id="aqiBadge">
+                        <div class="aqi-level" id="aqiLevel">—</div>
+                        <div class="aqi-label" id="aqiLabel">Loading...</div>
+                    </div>
+                    <div class="aqi-bar-wrapper">
+                        <div class="aqi-bar" id="aqiBar"></div>
+                    </div>
+                </div>
+                <div class="pollutants-grid" id="pollutantsGrid">
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">PM2.5</div>
+                        <div class="pollutant-value" id="pm25">—</div>
+                        <div class="pollutant-unit">μg/m³</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">PM10</div>
+                        <div class="pollutant-value" id="pm10">—</div>
+                        <div class="pollutant-unit">μg/m³</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">NO₂</div>
+                        <div class="pollutant-value" id="no2">—</div>
+                        <div class="pollutant-unit">μg/m³</div>
+                    </div>
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">O₃</div>
+                        <div class="pollutant-value" id="o3">—</div>
+                        <div class="pollutant-unit">μg/m³</div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
