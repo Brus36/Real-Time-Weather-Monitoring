@@ -523,7 +523,13 @@ window.addEventListener("load", () => {
         fetchWeatherData(url);
       },
       (error) => {
-        console.log("Geolocation access denied or failed.");
+        if (error.code === error.POSITION_UNAVAILABLE) {
+          showError("Location services (GPS) are turned off");
+        } else if (error.code === error.PERMISSION_DENIED) {
+          showError("Location access denied");
+        } else {
+          showError("Failed to get location");
+        }
       }
     );
   }
