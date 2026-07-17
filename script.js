@@ -435,20 +435,13 @@ function fetchAirQuality(lat, lon) {
 // Fetch & Render Weather Data
 // ============================================
 
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const city = cityInput.value.trim();
-  if (!city) return;
-
+function fetchWeatherData(url) {
   showSkeleton();
 
   // Reset forecast & AQI sections
   forecastSection.classList.remove("animate-in");
   aqiSection.classList.remove("animate-in");
   aqiBar.style.width = "0%";
-
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
 
   fetch(url)
     .then((response) => response.json())
@@ -500,7 +493,7 @@ form.addEventListener("submit", function (e) {
       showWeatherCard();
 
       // Fetch supplementary data (forecast + air quality)
-      fetchForecast(city);
+      fetchForecast(data.name);
       fetchAirQuality(data.coord.lat, data.coord.lon);
     })
     .catch(() => {
@@ -508,5 +501,31 @@ form.addEventListener("submit", function (e) {
       emptyState.style.display = "block";
       showError("Network error — check your connection");
     });
+}
+
+// Search by city name
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const city = cityInput.value.trim();
+  if (!city) return;
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+  fetchWeatherData(url);
+});
+
+// Auto-detect location on load
+window.addEventListener("load", () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+        fetchWeatherData(url);
+      },
+      (error) => {
+        console.log("Geolocation access denied or failed.");
+      }
+    );
+  }
 });
 
